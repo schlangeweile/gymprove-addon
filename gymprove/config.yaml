@@ -1,0 +1,41 @@
+# Canonical Home Assistant add-on configuration (AGENTS.md §3.9, §11.9).
+#
+# The builder validates this file and derives the image version from it; the
+# GitHub Actions workflow syncs it to gymprove/config.yaml in the public
+# add-on repository on every v* tag. Release flow: bump version below, tag
+# the commit v<version>, push the tag.
+name: GYMprove
+version: "1.0.0-rc.1"
+slug: gymprove
+description: Trainingsplan & Trainingslogbuch — eigenständiger Dienst mit eigenem Login (kein Ingress).
+url: https://github.com/schlangeweile/gymprove-addon
+arch:
+  - aarch64
+  - amd64
+# rc phase during parallel operation (AGENTS.md §3.11); switch to stable with
+# the 1.0.0 release in slice 10.
+stage: experimental
+image: ghcr.io/schlangeweile/{arch}-addon-gymprove
+# No webui button on purpose: the session cookies are Secure, so the HTTP
+# add-on port cannot complete a login, and the button would invite users to
+# type their password over plain HTTP. Access is HTTPS-only via the
+# external Caddy route.
+watchdog: http://[HOST]:[PORT:9250]/health
+ports:
+  9250/tcp: 9250
+environment:
+  GYMPROVE_ADDR: ":9250"
+  GYMPROVE_DB: /data/gymprove.db
+  # X-Forwarded-For is NOT trusted: the published LAN port would let any
+  # client forge it and rotate the login throttle. The account-based limit
+  # still works with the Caddy peer address.
+  GYMPROVE_TRUST_PROXY: "0"
+# Cold snapshots stop the add-on before HA archives /data. A hot tar of a
+# live SQLite WAL database (db + -wal + -shm) is not a consistent set.
+# For backups without downtime use: gymprove backup -o /share/gymprove.db
+backup: cold
+# /share for data transfer (import files, consistent manual backups).
+map:
+  - share
+options: {}
+schema: {}
