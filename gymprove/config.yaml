@@ -5,7 +5,7 @@
 # add-on repository on every v* tag. Release flow: bump version below, tag
 # the commit v<version>, push the tag.
 name: GYMprove
-version: "1.1.0-m2test1"
+version: "1.1.0-m2test2"
 slug: gymprove
 description: Trainingsplan & Trainingslogbuch — eigenständiger Dienst mit eigenem Login (kein Ingress).
 url: https://github.com/schlangeweile/gymprove-addon
